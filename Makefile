@@ -25,7 +25,7 @@ all:	$(BINS)
 	$(CC) -o $@ $<
 
 clean:
-	rm -f *.o *.lst *.map *.gb *~ *.rel *.cdb *.ihx *.lnk *.sym *.asm *.noi *.sav
+	rm -f *.o *.lst *.map *.gb *~ *.rel *.cdb *.ihx *.lnk *.sym *.asm *.noi *.sav sprite.c
 
 # Use png2asset to convert the png into C formatted metasprite data
 # -sh 16   : Sets sprite height to 16 (width remains automatic)

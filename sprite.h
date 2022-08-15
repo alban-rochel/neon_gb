@@ -11,7 +11,7 @@
 #define sprite_TILE_H 16
 #define sprite_WIDTH 16
 #define sprite_HEIGHT 16
-#define sprite_TILE_COUNT 8
+#define sprite_TILE_COUNT 20
 #define sprite_PALETTE_COUNT 1
 #define sprite_COLORS_PER_PALETTE 4
 #define sprite_TOTAL_COLORS 4
@@ -23,7 +23,7 @@
 BANKREF_EXTERN(sprite)
 
 extern const palette_color_t sprite_palettes[4];
-extern const uint8_t sprite_tiles[128];
+extern const uint8_t sprite_tiles[320];
 
 extern const metasprite_t* const sprite_metasprites[10];
 

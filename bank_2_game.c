@@ -30,13 +30,26 @@ void game_loop() BANKED
 
     while(1)
     {
-        if((frame_count >> 5) & 0x1)
+        /*if((frame_count >> 5) & 0x1)
         {
             move_metasprite       (sprite_metasprites[0], TILE_NUM_START, SPR_NUM_START, 100, 100);
         }
         else
         {
             move_metasprite       (sprite_metasprites[1], TILE_NUM_START, SPR_NUM_START, 100, 100);
+        }*/
+        if(frame_count == 40)
+        {
+            move_metasprite       (sprite_metasprites[2], TILE_NUM_START, SPR_NUM_START, 100, 100);
+            frame_count = 0;
+        }
+        else if(frame_count == 10 || frame_count == 30)
+        {
+            move_metasprite       (sprite_metasprites[3], TILE_NUM_START, SPR_NUM_START, 100, 100);
+        }
+        else if(frame_count == 20)
+        {
+            move_metasprite       (sprite_metasprites[4], TILE_NUM_START, SPR_NUM_START, 100, 100);
         }
         ++frame_count;
         wait_vbl_done();  
