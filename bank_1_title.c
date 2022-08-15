@@ -16,8 +16,8 @@ void title_loop() BANKED
 
     set_bkg_data(0x0, neon_title_tile_count, neon_title_tile_data);
 
-    VBK_REG = 1;
-    VBK_REG = 0;
+    //VBK_REG = 1;
+    //VBK_REG = 0;
 
     set_bkg_tiles(0, 0, neon_title_tile_map_width, neon_title_tile_map_height, neon_title_map_data);
 

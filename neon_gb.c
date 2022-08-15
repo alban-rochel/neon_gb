@@ -37,8 +37,8 @@ void main() {
 
 	while(1)
 	{
-		SWITCH_ROM_MBC1(1);
-		title_loop();
+		/*SWITCH_ROM_MBC1(1);
+		title_loop();*/
 
 		SWITCH_ROM_MBC1(2);
 		game_loop();

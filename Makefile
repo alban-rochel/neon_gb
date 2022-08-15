@@ -1,8 +1,14 @@
 # Tutorial: [How to write a simple side scrolling game in GBDK](https://pastebin.com/F3tHLj68) by Jason
 
 CC = lcc -Wa-l -Wl-m  -Wl-j
+PNG2ASSET = png2asset
 
 BINS	= neon_gb.gb
+
+# Add entries here to have them converted into metasprites
+PNGSOURCES   = sprite.png
+PNG_CSOURCES = $(PNGSOURCES:%.png=%.c)
+PNG_CHEADERS = $(PNGSOURCES:%.png=%.h)
 
 all:	$(BINS)
 
@@ -20,6 +26,13 @@ all:	$(BINS)
 
 clean:
 	rm -f *.o *.lst *.map *.gb *~ *.rel *.cdb *.ihx *.lnk *.sym *.asm *.noi *.sav
+
+# Use png2asset to convert the png into C formatted metasprite data
+# -sh 16   : Sets sprite height to 16 (width remains automatic)
+# -spr8x16 : Use 8x16 hardware sprites
+# -c ...   : Set C output file
+%.c:	%.png
+	$(PNG2ASSET) $< -sh 16 -spr8x16 -c $@ 
 
 # Compile bank 0 (no ROM)
 #      RAM bank 0 : -Wf-ba0
@@ -40,6 +53,8 @@ bank_1_title.o:	bank_1_title.c
 #
 bank_2_game.o:	bank_2_game.c
 	$(CC) -Wf-bo2 -c -o $@ $<
+sprite.o:	sprite.c
+	$(CC) -Wf-bo2 -c -o $@ $<
 
-neon_gb.gb:	neon_gb.o bank_1_title.o bank_2_game.o
-	$(CC) -Wl-yt0x1A -Wl-yo4 -Wl-ya4 -o $@ neon_gb.o bank_1_title.o bank_2_game.o
+neon_gb.gb:	neon_gb.o bank_1_title.o bank_2_game.o sprite.o
+	$(CC) -Wl-yt0x1A -Wl-yo4 -Wl-ya4 -o $@ neon_gb.o bank_1_title.o bank_2_game.o sprite.o
