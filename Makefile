@@ -57,4 +57,4 @@ sprite.o:	sprite.c
 	$(CC) -Wf-bo2 -c -o $@ $<
 
 neon_gb.gb:	neon_gb.o bank_1_title.o bank_2_game.o sprite.o
-	$(CC) -Wl-yt0x1A -Wl-yo4 -Wl-ya4 -o $@ neon_gb.o bank_1_title.o bank_2_game.o sprite.o
+	$(CC) -Wm-yn"NEON" -Wl-yt0x1A -Wl-yo4 -Wl-ya4 -o $@ neon_gb.o bank_1_title.o bank_2_game.o sprite.o

@@ -10,6 +10,160 @@
 // Metasprite tiles are loaded into VRAM starting at tile number 0 
 #define TILE_NUM_START 0
 
+#define STATE_IDLE 0
+#define STATE_RUNNING 1
+#define STATE_JUMPING 2
+#define STATE_FALLING 3
+#define STATE_MASK 0x07
+// 3 bits
+
+#define STATE_MOD_LOOKING_LEFT 0x08
+#define STATE_MOD_ATTACKING 0x10
+
+#define ACCEL_X 2
+#define ACCEL_Y 4
+#define BRAKE_Y 1
+#define MAX_VELOCITY_X 32
+#define MAX_VELOCITY_Y 32
+#define POSITION_SHIFT 4
+
+uint8_t current_state;
+uint8_t frame_count;
+uint8_t char_change;
+
+uint16_t world_pos_x;
+uint16_t world_pos_y;
+int16_t speed_x;
+int16_t speed_y;
+uint8_t jmp_count;
+uint8_t falling;
+uint8_t left_moving;
+
+const metasprite_t* current_sprite;
+
+void update_character()
+{
+    uint8_t joy = joypad();
+
+    if(joy & J_LEFT)
+    {
+        if(speed_x > 0)
+            speed_x = 0;
+
+        left_moving = 1;
+        
+        speed_x -= ACCEL_X;
+        if(speed_x < - MAX_VELOCITY_X)
+        {
+            speed_x = - MAX_VELOCITY_X;
+        }
+    }
+    else if(joy & J_RIGHT)
+    {
+        if(speed_x < 0)
+            speed_x = 0;
+
+        left_moving = 0;
+
+        speed_x += ACCEL_X;
+        if(speed_x > MAX_VELOCITY_X)
+        {
+            speed_x = MAX_VELOCITY_X;
+        }
+    }
+    else
+    {
+        speed_x = 0;
+    }
+
+    world_pos_x += speed_x;
+
+    if((joy & J_A) && (falling == 0))
+    {
+        speed_y -= ACCEL_Y;
+        if(speed_y < - MAX_VELOCITY_Y)
+        {
+            speed_y = - MAX_VELOCITY_Y;
+        }
+        ++ jmp_count;
+        if(jmp_count > 10)
+        {
+            falling = 1;
+        }
+    }
+    else
+    {
+        speed_y += 2;
+        if(speed_y > MAX_VELOCITY_Y)
+        {
+            speed_y = MAX_VELOCITY_Y;
+        }
+    }
+
+    world_pos_y += speed_y;
+
+    if(world_pos_y >= (136 << POSITION_SHIFT))
+    {
+        world_pos_y = (136 << POSITION_SHIFT);
+        falling = 0;
+        jmp_count = 0;
+        speed_y = 0;
+    }
+
+    if(speed_y < 0)
+    {
+        current_sprite = sprite_metasprites[5]; // jump
+    }
+    else if(speed_y > 0)
+    {
+        current_sprite = sprite_metasprites[6]; // fall
+    }
+    else
+    {
+        if(speed_x == 0)
+        {
+            uint8_t temp = frame_count >> 5;
+            if(temp & 0x01)
+            {
+                current_sprite = sprite_metasprites[0];
+            }
+            else
+            {
+                current_sprite = sprite_metasprites[1];
+            }
+        }
+        else
+        {
+            uint8_t temp = frame_count >> 3;
+            if(temp & 0x01)
+            {
+                current_sprite = sprite_metasprites[3];
+            }
+            else
+            {
+                if(temp & 0x02)
+                {
+                    current_sprite = sprite_metasprites[4];
+                }
+                else
+                {
+                    current_sprite = sprite_metasprites[2];
+                }
+            }
+        }
+    }
+
+
+    if(left_moving)
+    {
+        move_metasprite_vflip       (current_sprite, TILE_NUM_START, SPR_NUM_START, world_pos_x >> POSITION_SHIFT, world_pos_y >> POSITION_SHIFT);
+    }
+    else
+    {
+        move_metasprite       (current_sprite, TILE_NUM_START, SPR_NUM_START, world_pos_x >> POSITION_SHIFT, world_pos_y >> POSITION_SHIFT);
+    }
+}
+
 void game_loop() BANKED
 {
     SPRITES_8x16;
@@ -26,7 +180,19 @@ void game_loop() BANKED
     // show bkg and sprites
     SHOW_BKG; SHOW_SPRITES;
 
-    uint8_t frame_count = 0;
+    frame_count = 0;
+
+    current_state = STATE_IDLE; // Looking right, not attacking
+
+    move_metasprite(sprite_metasprites[0], TILE_NUM_START, SPR_NUM_START, 100, 100);
+
+    world_pos_x = 100 << POSITION_SHIFT;
+    world_pos_y = 100 << POSITION_SHIFT;
+    speed_x = 0;
+    speed_y = 0;
+    falling = 0;
+    current_sprite = sprite_metasprites[0];
+    left_moving = 0;
 
     while(1)
     {
@@ -38,7 +204,7 @@ void game_loop() BANKED
         {
             move_metasprite       (sprite_metasprites[1], TILE_NUM_START, SPR_NUM_START, 100, 100);
         }*/
-        if(frame_count == 40)
+        /*if(frame_count == 40)
         {
             move_metasprite       (sprite_metasprites[2], TILE_NUM_START, SPR_NUM_START, 100, 100);
             frame_count = 0;
@@ -50,7 +216,10 @@ void game_loop() BANKED
         else if(frame_count == 20)
         {
             move_metasprite       (sprite_metasprites[4], TILE_NUM_START, SPR_NUM_START, 100, 100);
-        }
+        }*/
+
+        update_character();
+
         ++frame_count;
         wait_vbl_done();  
     }
