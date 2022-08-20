@@ -38,6 +38,8 @@ int16_t speed_y;
 uint8_t jmp_count;
 uint8_t falling;
 uint8_t left_moving;
+int16_t viewport_x_target;
+int16_t current_viewport_x;
 
 const metasprite_t* current_sprite;
 
@@ -86,7 +88,7 @@ void update_character()
             speed_y = - MAX_VELOCITY_Y;
         }
         ++ jmp_count;
-        if(jmp_count > 10)
+        if(jmp_count > 15)
         {
             falling = 1;
         }
@@ -102,9 +104,24 @@ void update_character()
 
     world_pos_y += speed_y;
 
-    if(world_pos_y >= (136 << POSITION_SHIFT))
+    uint8_t ground_level_hack = 144;
     {
-        world_pos_y = (136 << POSITION_SHIFT);
+        uint8_t pos_x_hack = (world_pos_x >> POSITION_SHIFT);
+        if(pos_x_hack >= 84 && pos_x_hack < 140)
+        {
+            ground_level_hack = 112;
+        }
+        else if(pos_x_hack >= 140 && pos_x_hack < 252)
+        {
+            ground_level_hack = 128;
+        }
+    }
+
+
+
+    if(world_pos_y >= (ground_level_hack << POSITION_SHIFT))
+    {
+        world_pos_y = (ground_level_hack << POSITION_SHIFT);
         falling = 0;
         jmp_count = 0;
         speed_y = 0;
@@ -153,14 +170,30 @@ void update_character()
         }
     }
 
-
     if(left_moving)
     {
-        move_metasprite_vflip       (current_sprite, TILE_NUM_START, SPR_NUM_START, world_pos_x >> POSITION_SHIFT, world_pos_y >> POSITION_SHIFT);
+        //viewport_x_target = (world_pos_x >> POSITION_SHIFT) - 160;
     }
     else
     {
-        move_metasprite       (current_sprite, TILE_NUM_START, SPR_NUM_START, world_pos_x >> POSITION_SHIFT, world_pos_y >> POSITION_SHIFT);
+        viewport_x_target = (world_pos_x >> POSITION_SHIFT) + 200;
+    }
+
+    current_viewport_x += (viewport_x_target - current_viewport_x) >> 4;
+    move_bkg(current_viewport_x, 8);
+
+    if(left_moving)
+    {
+        uint8_t pos_x = (world_pos_x >> POSITION_SHIFT) - current_viewport_x;
+        if(pos_x > 200)
+        {
+            pos_x = 0;
+        }
+        move_metasprite_vflip       (current_sprite, TILE_NUM_START, SPR_NUM_START, pos_x/*(world_pos_x >> POSITION_SHIFT) - current_viewport_x*/, world_pos_y >> POSITION_SHIFT);
+    }
+    else
+    {
+        move_metasprite       (current_sprite, TILE_NUM_START, SPR_NUM_START, (world_pos_x >> POSITION_SHIFT) - current_viewport_x, world_pos_y >> POSITION_SHIFT);
     }
 }
 
@@ -186,13 +219,14 @@ void game_loop() BANKED
 
     move_metasprite(sprite_metasprites[0], TILE_NUM_START, SPR_NUM_START, 100, 100);
 
-    world_pos_x = 100 << POSITION_SHIFT;
-    world_pos_y = 100 << POSITION_SHIFT;
+    world_pos_x = 24 << POSITION_SHIFT;
+    world_pos_y = 144 << POSITION_SHIFT;
     speed_x = 0;
     speed_y = 0;
     falling = 0;
     current_sprite = sprite_metasprites[0];
     left_moving = 0;
+    current_viewport_x = 200;
 
     while(1)
     {
