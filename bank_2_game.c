@@ -41,6 +41,8 @@ uint8_t left_moving;
 int16_t viewport_x_target;
 int16_t current_viewport_x;
 
+uint8_t attacking;
+
 const metasprite_t* current_sprite;
 
 void update_character()
@@ -79,6 +81,11 @@ void update_character()
     }
 
     world_pos_x += speed_x;
+
+    if(joy & J_B)
+    {
+        attacking = 1;
+    }
 
     if((joy & J_A) && (falling == 0))
     {
@@ -170,6 +177,24 @@ void update_character()
         }
     }
 
+    if(attacking)
+    {
+        if(attacking < 4)
+        {
+            current_sprite = sprite_metasprites[7];
+        }
+        else
+        {
+            current_sprite = sprite_metasprites[8];
+        }
+
+        ++attacking;
+        if(attacking >= 10)
+        {
+            attacking = 0;
+        }
+    }
+
     if(left_moving)
     {
         //viewport_x_target = (world_pos_x >> POSITION_SHIFT) - 160;
@@ -227,6 +252,7 @@ void game_loop() BANKED
     current_sprite = sprite_metasprites[0];
     left_moving = 0;
     current_viewport_x = 200;
+    attacking = 0;
 
     while(1)
     {
